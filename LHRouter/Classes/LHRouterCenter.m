@@ -90,7 +90,7 @@
     NSMutableDictionary *parameters = [self parametersFromURL:url];
     [parameters addEntriesFromDictionary:userInfo];
 
-    return [self.class gotoViewController:(class.length ? class : url) fromViewController:(controller ? controller : [self topViewController]) withUserInfo:parameters];
+    return [self.class gotoViewController:(class.length ? class : host) fromViewController:(controller ? controller : [self topViewController]) withUserInfo:parameters];
 }
 
 - (NSString *)hostFromURL:(NSString *)url
@@ -195,6 +195,11 @@
         const char *_className = _allClassNames[i];
         NSString *name = [NSString stringWithUTF8String:_className];
         Class class = NSClassFromString(name);
+
+        if (![class respondsToSelector:selector]) {
+            return;
+        }
+
         NSMethodSignature *signature = [class methodSignatureForSelector:selector];
         if (signature && !strcmp(signature.methodReturnType, @encode(id))) {
             NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
@@ -206,6 +211,7 @@
             [invocation getReturnValue:&value];
 
             if ([value isKindOfClass:[NSString class]]) {
+                NSAssert([value rangeOfString:@"?"].location == NSNotFound, @"Do not contain '?' in the return value of [%@ %@]", name, NSStringFromSelector(selector));
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
                 [mutableDic setObject:name forKey:value];
                 dispatch_semaphore_signal(semaphore);

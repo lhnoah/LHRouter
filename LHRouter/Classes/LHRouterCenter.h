@@ -12,8 +12,11 @@
 
 @protocol LHRouterCenterProtocol <NSObject>
 
-+ (NSString *)lh_routerURL;
+@required
 + (BOOL)lh_showFromViewController:(nonnull UIViewController *)controller withUserInfo:(nullable NSDictionary *)userInfo;
+
+@optional
++ (NSString *)lh_routerURL; // Default is class name if not implemented
 
 @end
 

@@ -43,7 +43,7 @@
     if (arc4random() % 2) {
         [[LHRouterCenter sharedInstance] openURL:@"lh://first?title=&content=Hello World" fromViewController:nil withUserInfo:nil];
     } else {
-        [[LHRouterCenter sharedInstance] openURL:@"SecondViewController" fromViewController:self withUserInfo:@{ @"image": [UIImage new] }];
+        [[LHRouterCenter sharedInstance] openURL:@"SecondViewController?title=Hello" fromViewController:self withUserInfo:@{ @"image": [UIImage new] }];
     }
 }
 

@@ -15,11 +15,6 @@
 
 @implementation SecondViewController
 
-+ (NSString *)lh_routerURL
-{
-    return @"lh://second";
-}
-
 + (BOOL)lh_showFromViewController:(UIViewController *)controller withUserInfo:(NSDictionary *)userInfo
 {
     UIViewController *vc = [[self alloc] init];
