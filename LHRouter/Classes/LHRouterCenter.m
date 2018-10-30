@@ -151,7 +151,8 @@
 #if DEBUG
         NSDate *date = [NSDate date];
 #else
-        NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+        NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
+        NSString *version = [NSString stringWithFormat:@"%@_%@", info[@"CFBundleShortVersionString"], info[@"CFBundleVersion"]];
         NSString *key = @"kLHRouterUserDefaultKey";
         NSDictionary *dic = [[[NSUserDefaults standardUserDefaults] objectForKey:key] objectForKey:version];
 
