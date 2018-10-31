@@ -153,7 +153,7 @@
 #else
         NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
         NSString *version = [NSString stringWithFormat:@"%@_%@", info[@"CFBundleShortVersionString"], info[@"CFBundleVersion"]];
-        NSString *key = @"kLHRouterUserDefaultKey";
+        NSString *key = [NSString stringWithFormat:@"%@.%@", info[@"CFBundleIdentifier"], NSStringFromClass(self.class)];
         NSDictionary *dic = [[[NSUserDefaults standardUserDefaults] objectForKey:key] objectForKey:version];
 
         if ([dic isKindOfClass:[NSDictionary class]]) {
