@@ -10,6 +10,8 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
+#define FLAG 1
+
 @interface LHRouterCenter ()
 
 @property (strong, nonatomic) NSDictionary *routerTable;
@@ -65,17 +67,8 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [self sharedInstance];
+        [[self sharedInstance] routerTable];
     });
-}
-
-- (instancetype)init
-{
-    if (self = [super init]) {
-        [self routerTable];
-    }
-
-    return self;
 }
 
 - (BOOL)openURL:(nonnull NSString *)url fromViewController:(nullable UIViewController *)controller withUserInfo:(nullable NSDictionary *)userInfo
@@ -150,14 +143,19 @@
     if (!_routerTable) {
 #if DEBUG
         NSDate *date = [NSDate date];
-#else
+#endif
+#if !(DEBUG && FLAG)
         NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
         NSString *version = [NSString stringWithFormat:@"%@_%@", info[@"CFBundleShortVersionString"], info[@"CFBundleVersion"]];
         NSString *key = [NSString stringWithFormat:@"%@.%@", info[@"CFBundleIdentifier"], NSStringFromClass(self.class)];
         NSDictionary *dic = [[[NSUserDefaults standardUserDefaults] objectForKey:key] objectForKey:version];
 
         if ([dic isKindOfClass:[NSDictionary class]]) {
-            _routerTable = dic;
+            @synchronized (self) {
+                if (!_routerTable) {
+                    _routerTable = dic;
+                }
+            }
         } else {
 #endif
             // UIWebView的initialize方法必须在主线程调用，此处调用class或hash方法来触发initialize方法
@@ -175,7 +173,8 @@
                     _routerTable = [self fetchSchema:&count];
 #if DEBUG
                     NSLog(@"%s elapsed time: %f, count of classes: %@", __func__, -[date timeIntervalSinceNow], @(count));
-#else
+#endif
+#if !(DEBUG && FLAG)
                     [[NSUserDefaults standardUserDefaults] setObject:[NSDictionary dictionaryWithObject:_routerTable forKey:version] forKey:key];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                 }
