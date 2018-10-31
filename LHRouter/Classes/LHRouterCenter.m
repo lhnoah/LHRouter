@@ -160,15 +160,28 @@
             _routerTable = dic;
         } else {
 #endif
-            NSInteger count = 0;
-            _routerTable = [self fetchSchema:&count];
+            // UIWebView的initialize方法必须在主线程调用，此处调用class或hash方法来触发initialize方法
+            if ([NSThread currentThread].isMainThread) {
+                [UIWebView class];
+            } else {
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [UIWebView hash];
+                });
+            }
+
+            @synchronized (self) {
+                if (!_routerTable) {
+                    NSInteger count = 0;
+                    _routerTable = [self fetchSchema:&count];
 #if DEBUG
-            NSLog(@"%s elapsed time: %f, count of classes: %@", __func__, -[date timeIntervalSinceNow], @(count));
+                    NSLog(@"%s elapsed time: %f, count of classes: %@", __func__, -[date timeIntervalSinceNow], @(count));
 #else
-            [[NSUserDefaults standardUserDefaults] setObject:[NSDictionary dictionaryWithObject:_routerTable forKey:version] forKey:key];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-        }
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSDictionary dictionaryWithObject:_routerTable forKey:version] forKey:key];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                }
 #endif
+            }
+        }
     }
 
     return _routerTable;
@@ -176,15 +189,6 @@
 
 - (NSDictionary *)fetchSchema:(NSInteger *)count
 {
-    // UIWebView的initialize方法必须在主线程调用，此处调用class或hash方法来触发initialize方法
-    if ([NSThread currentThread].isMainThread) {
-        [UIWebView class];
-    } else {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            [UIWebView hash];
-        });
-    }
-
     NSMutableDictionary *mutableDic = [NSMutableDictionary new];
     unsigned _classCount = 0;
     NSString *appBundle = [NSBundle mainBundle].executablePath;
