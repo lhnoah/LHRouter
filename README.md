@@ -19,20 +19,27 @@ pod 'LHRouter'
 
 ```objective-c
 #import <LHRouter/LHRouterCenter.h>
-...
-// Implement LHRouterCenterProtocol
+
+// Implement LHRouterCenterProtocol in a UIViewController
+
 + (NSString *)lh_routerURL // @optional
 {
     return @"lh://router";
 }
-+ (BOOL)lh_showFromViewController:(UIViewController *)controller withUserInfo:(NSDictionary *)userInfo // @required
+
++ (BOOL)lh_showFromViewController:(UIViewController *)controller 
+                     withUserInfo:(NSDictionary *)userInfo
 {
     UIViewController *vc = [[self alloc] init];
     [controller presentViewController:vc animated:YES completion:nil];
     NSLog(@"%s %@", __func__, userInfo);
     return YES;
 }
-...
-// Then
-[[LHRouterCenter sharedInstance] openURL:@"lh://router?title=&content=Hello World" fromViewController:nil withUserInfo:nil];
+
+
+// Call the following method in an other UIViewController
+
+[[LHRouterCenter sharedInstance] openURL:@"lh://router?title=&content=Hello World"
+                      fromViewController:nil 
+                            withUserInfo:nil];
 ```
