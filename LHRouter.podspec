@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.homepage              = "https://github.com/lhnoah/LHRouter"
   s.license               = "MIT"
   s.author                = { "Noah" => "lh_1989@126.com" }
-  s.source                = { :git => "https://github.com/lhnoah/LHRouter" }
+  s.source                = { :git => "https://github.com/lhnoah/LHRouter.git", :tag => s.version.to_s }
   s.source_files          = "LHRouter/Classes/**/*.{h,m}"
   s.ios.deployment_target = '9.0'
 
