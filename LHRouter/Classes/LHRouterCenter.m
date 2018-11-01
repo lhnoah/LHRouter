@@ -36,14 +36,20 @@
     return sharedInstance;
 }
 
-+ (BOOL)gotoViewController:(NSString *)className fromViewController:(UIViewController *)controller withUserInfo:(NSDictionary *)userInfo
++ (BOOL)gotoViewController:(Class)class fromViewController:(UIViewController *)controller withUserInfo:(NSDictionary *)userInfo
 {
-    if (!controller) {
+    if (!class || !controller) {
         return NO;
     }
 
-    Class class = NSClassFromString(className);
     SEL selector = @selector(lh_showFromViewController:withUserInfo:);
+
+#if !DEBUG
+    if (![class respondsToSelector:selector]) {
+        return NO;
+    }
+#endif
+
     NSMethodSignature *signature = [class methodSignatureForSelector:selector];
     if (signature && !strcmp(signature.methodReturnType, @encode(BOOL))) {
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
@@ -71,19 +77,66 @@
     });
 }
 
-- (BOOL)openURL:(nonnull NSString *)url fromViewController:(nullable UIViewController *)controller withUserInfo:(nullable NSDictionary *)userInfo
+- (BOOL)canOpenURL:(nonnull NSString *)url error:(NSError **)error
 {
-    if (!url.length) {
+    NSErrorDomain domain = [NSStringFromClass(self.class) stringByAppendingString:@"ErrorDomain"];
+
+    if (![url isKindOfClass:NSString.class]) {
+        if (error) {
+            *error = [NSError errorWithDomain:domain code:LHRouterCenterErrorInvalidInput userInfo:nil];
+        }
+
         return NO;
     }
 
-    NSString *host = [self hostFromURL:url];
-    NSString *class = self.routerTable[host];
+    Class class = [self classFromURL:url];
+
+    if (!class) {
+        if (error) {
+            *error = [NSError errorWithDomain:domain code:LHRouterCenterErrorUnknownURL userInfo:nil];
+        }
+
+        return NO;
+    }
+
+    SEL selector = @selector(lh_showFromViewController:withUserInfo:);
+
+    if (![class respondsToSelector:selector]) {
+        if (error) {
+            *error = [NSError errorWithDomain:domain code:LHRouterCenterErrorNoResponder userInfo:nil];
+        }
+
+        return NO;
+    }
+
+    if (error) {
+        *error = nil;
+    }
+
+    return YES;
+}
+
+- (BOOL)openURL:(nonnull NSString *)url fromViewController:(nullable UIViewController *)controller withUserInfo:(nullable NSDictionary *)userInfo
+{
+    if (![url isKindOfClass:NSString.class]) {
+        return NO;
+    }
     
     NSMutableDictionary *parameters = [self parametersFromURL:url];
     [parameters addEntriesFromDictionary:userInfo];
 
-    return [self.class gotoViewController:(class.length ? class : host) fromViewController:(controller ? controller : [self topViewController]) withUserInfo:parameters];
+    return [self.class gotoViewController:[self classFromURL:url] fromViewController:(controller ? controller : [self topViewController]) withUserInfo:parameters];
+}
+
+- (Class)classFromURL:(NSString *)url
+{
+    NSString *host = [self hostFromURL:url];
+    NSString *class = self.routerTable[host];
+    if (!class.length) {
+        class = host;
+    }
+
+    return NSClassFromString(class);
 }
 
 - (NSString *)hostFromURL:(NSString *)url

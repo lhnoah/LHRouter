@@ -30,6 +30,12 @@
 
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(show)];
     [self.view addGestureRecognizer:tap];
+
+    NSError *error;
+    BOOL can = [[LHRouterCenter sharedInstance] canOpenURL:NSStringFromClass(self.class) error:&error];
+    if (!can) {
+        NSLog(@"%@", error);
+    }
 }
 
 

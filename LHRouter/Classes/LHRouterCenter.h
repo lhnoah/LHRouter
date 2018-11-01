@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum : NSInteger {
+    LHRouterCenterErrorInvalidInput = -1,
+    LHRouterCenterErrorUnknownURL   = -2,
+    LHRouterCenterErrorNoResponder  = -3,
+} LHRouterCenterError;
+
 @class UIViewController;
 
 @protocol LHRouterCenterProtocol <NSObject>
@@ -27,6 +33,7 @@
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)new NS_UNAVAILABLE;
 
+- (BOOL)canOpenURL:(nonnull NSString *)url error:(NSError **)error;
 - (BOOL)openURL:(nonnull NSString *)url fromViewController:(nullable UIViewController *)controller withUserInfo:(nullable NSDictionary *)userInfo;
 
 @end
