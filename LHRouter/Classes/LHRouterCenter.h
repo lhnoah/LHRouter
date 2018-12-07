@@ -30,8 +30,8 @@ typedef enum : NSInteger {
 
 + (instancetype)sharedInstance;
 
++ (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)new NS_UNAVAILABLE;
 
 - (BOOL)canOpenURL:(nonnull NSString *)url error:(NSError **)error;
 - (BOOL)openURL:(nonnull NSString *)url fromViewController:(nullable UIViewController *)controller withUserInfo:(nullable NSDictionary *)userInfo;
